@@ -8,7 +8,14 @@ import analyticsRoutes from "./routes/analyticsRoutes.js";
 
 const app = express();
 
-app.use(cors());
+app.use(cors({
+  origin: [
+    "http://localhost:5173",
+    "https://fin-track-personal-finance-tracker.vercel.app/"
+  ],
+  credentials: true
+}));
+
 app.use(express.json());
 
 // Routes
