@@ -9,13 +9,19 @@ const TransactionContext = createContext();
 
 export const TransactionProvider = ({ children }) => {
   const [transactions, setTransactions] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   const fetchTransactions = async () => {
-    setLoading(true);
-    const data = await getTransactions();
-    setTransactions(data);
-    setLoading(false);
+    try {
+      setLoading(true);
+      const data = await getTransactions();
+      setTransactions(data || []);
+    } catch (err) {
+      console.error("Failed to fetch transactions", err);
+      setTransactions([]);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const createTransaction = async (tx) => {
@@ -29,12 +35,21 @@ export const TransactionProvider = ({ children }) => {
   };
 
   useEffect(() => {
-    fetchTransactions();
+    const user = localStorage.getItem("fintrack_user");
+    if (user) {
+      fetchTransactions();
+    }
   }, []);
 
   return (
     <TransactionContext.Provider
-      value={{ transactions, loading, createTransaction, removeTransaction }}
+      value={{
+        transactions,
+        loading,
+        createTransaction,
+        removeTransaction,
+        fetchTransactions, // optional but useful
+      }}
     >
       {children}
     </TransactionContext.Provider>
@@ -42,3 +57,4 @@ export const TransactionProvider = ({ children }) => {
 };
 
 export const useTransactions = () => useContext(TransactionContext);
+
